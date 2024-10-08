@@ -31,6 +31,8 @@ logger = logging.getLogger(__name__)
 # Load environment variables
 load_dotenv()
 
+client = OpenAI()
+
 llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
 DOCUMENT_PATH = "docs/HR_internal.pdf"
@@ -64,6 +66,15 @@ if not os.path.exists(UPLOAD_DIRECTORY):
 
 
 def generate_voice_response(text: str) -> bytes:
+    speech_file_path = os.path.join(os.path.dirname(__file__), "speech.mp3")
+    response = client.audio.speech.create(
+        model="tts-1",
+        voice="nova",
+        input=text)
+
+    response.stream_to_file(speech_file_path)
+    with open(speech_file_path, 'rb') as audio_file:
+        return audio_file.read()
     # ElevenLabs Code (English)
     # elevenlabs_api_key = os.getenv("ELEVENLABS_API_KEY")
     # voice_id = os.getenv("ELEVENLABS_VOICE_ID")
@@ -90,19 +101,19 @@ def generate_voice_response(text: str) -> bytes:
     # return response.content
 
     # MeloTTS-French Code
-    speed = 1.2  # Speed is adjustable
-    device = 'cpu'  # or 'cuda:0' for GPU usage
+    # speed = 1.2  # Speed is adjustable
+    # device = 'cpu'  # or 'cuda:0' for GPU usage
 
-    model = TTS(language='FR', device=device)
-    speaker_ids = model.hps.data.spk2id
+    # model = TTS(language='FR', device=device)
+    # speaker_ids = model.hps.data.spk2id
 
-    output_path = 'fr.wav'  # Path to save the generated speech
+    # output_path = 'fr.wav'  # Path to save the generated speech
 
 
-    model.tts_to_file(text, speaker_ids['FR'], output_path, speed=speed)
+    # model.tts_to_file(text, speaker_ids['FR'], output_path, speed=speed)
 
-    with open(output_path, 'rb') as audio_file:
-       return audio_file.read()
+    # with open(output_path, 'rb') as audio_file:
+    #    return audio_file.read()
 
 
 # Function to calculate file hash
